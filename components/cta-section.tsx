@@ -5,7 +5,7 @@ import { ConsultationDialog } from "@/components/consultation-dialog"
 
 export function CTASection() {
   return (
-    <section id="contact" className="w-full bg-primary py-20 text-primary-foreground md:py-32">
+    <section className="w-full bg-primary py-20 text-primary-foreground md:py-32">
       <div className="container">
         <Card className="border-0 bg-primary-foreground/10 backdrop-blur">
           <CardContent className="p-8 md:p-12">

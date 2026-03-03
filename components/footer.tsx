@@ -20,22 +20,22 @@ export function Footer() {
             <h3 className="mb-4 text-sm font-semibold">Services</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="#" className="text-muted-foreground transition-colors hover:text-foreground">
+                <Link href="/services" className="text-muted-foreground transition-colors hover:text-foreground">
                   Integrated IT Services
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-muted-foreground transition-colors hover:text-foreground">
+                <Link href="/services" className="text-muted-foreground transition-colors hover:text-foreground">
                   Software Development & Automation
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-muted-foreground transition-colors hover:text-foreground">
+                <Link href="/services" className="text-muted-foreground transition-colors hover:text-foreground">
                   Data Analytics & AI
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-muted-foreground transition-colors hover:text-foreground">
+                <Link href="/services" className="text-muted-foreground transition-colors hover:text-foreground">
                   IT advisory & Strategy description
                 </Link>
               </li>
@@ -46,22 +46,22 @@ export function Footer() {
             <h3 className="mb-4 text-sm font-semibold">Company</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="#about" className="text-muted-foreground transition-colors hover:text-foreground">
+                <Link href="/about" className="text-muted-foreground transition-colors hover:text-foreground">
                   About Us
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-muted-foreground transition-colors hover:text-foreground">
-                  Careers
+                <Link href="/approach" className="text-muted-foreground transition-colors hover:text-foreground">
+                  Our Approach
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-muted-foreground transition-colors hover:text-foreground">
-                  Case Studies
+                <Link href="/mission-vision" className="text-muted-foreground transition-colors hover:text-foreground">
+                  Mission & Vision
                 </Link>
               </li>
               <li>
-                <Link href="#contact" className="text-muted-foreground transition-colors hover:text-foreground">
+                <Link href="/contact" className="text-muted-foreground transition-colors hover:text-foreground">
                   Contact
                 </Link>
               </li>

@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ArrowRight } from "lucide-react"
 import { ConsultationDialog } from "@/components/consultation-dialog"
@@ -23,9 +24,11 @@ export function HeroSection() {
           </p>
 
           <div className="flex flex-col items-center justify-center gap-4 pt-4 sm:flex-row">
-            <Button size="lg" className="group">
-              Explore Our Services
-              <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+            <Button size="lg" className="group" asChild>
+              <Link href="/services">
+                Explore Our Services
+                <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </Link>
             </Button>
             <ConsultationDialog />
           </div>

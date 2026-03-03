@@ -3,7 +3,7 @@ import { Target, Eye, Lightbulb } from "lucide-react"
 
 export function MissionVisionSection() {
   return (
-    <section id="mission-vision" className="w-full py-20 md:py-32">
+    <section className="w-full py-20 md:py-32">
       <div className="container">
         <div className="mb-12 space-y-4 text-center">
           <h2 className="text-balance text-3xl font-bold tracking-tighter md:text-4xl lg:text-5xl">

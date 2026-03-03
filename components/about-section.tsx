@@ -13,7 +13,7 @@ const values = [
 
 export function AboutSection() {
   return (
-    <section id="about" className="w-full bg-muted/50 py-20 md:py-32">
+    <section className="w-full bg-muted/50 py-20 md:py-32">
       <div className="container">
         <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
           <div className="space-y-6">

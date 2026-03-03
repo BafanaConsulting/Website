@@ -29,7 +29,7 @@ const steps = [
 
 export function ApproachSection() {
   return (
-    <section id="approach" className="w-full py-20 md:py-32">
+    <section className="w-full py-20 md:py-32">
       <div className="container space-y-16">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-balance text-3xl font-bold tracking-tighter md:text-4xl lg:text-5xl">
