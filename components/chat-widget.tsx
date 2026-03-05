@@ -1,30 +1,22 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
-import { useChat } from "@ai-sdk/react"
-import { DefaultChatTransport } from "ai"
+import { useState, useRef, useEffect, useCallback } from "react"
 import { MessageCircle, X, Send, Bot, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
-function getMessageText(message: { parts?: Array<{ type: string; text?: string }> }): string {
-  if (!message.parts || !Array.isArray(message.parts)) return ""
-  return message.parts
-    .filter((p): p is { type: "text"; text: string } => p.type === "text")
-    .map((p) => p.text)
-    .join("")
+interface ChatMessage {
+  id: string
+  role: "user" | "assistant"
+  text: string
 }
 
 export function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false)
   const [input, setInput] = useState("")
+  const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [isLoading, setIsLoading] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
-
-  const { messages, sendMessage, status } = useChat({
-    transport: new DefaultChatTransport({ api: "/api/chat" }),
-  })
-
-  const isLoading = status === "streaming" || status === "submitted"
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -32,11 +24,90 @@ export function ChatWidget() {
     }
   }, [messages, isLoading])
 
+  const sendMessage = useCallback(async (text: string) => {
+    const userMsg: ChatMessage = {
+      id: crypto.randomUUID(),
+      role: "user",
+      text,
+    }
+
+    setMessages((prev) => [...prev, userMsg])
+    setIsLoading(true)
+
+    try {
+      const allMessages = [...messages, userMsg].map((m) => ({
+        role: m.role,
+        parts: [{ type: "text", text: m.text }],
+      }))
+
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: allMessages }),
+      })
+
+      if (!res.ok || !res.body) {
+        throw new Error("Failed to get response")
+      }
+
+      const assistantId = crypto.randomUUID()
+      let assistantText = ""
+
+      setMessages((prev) => [...prev, { id: assistantId, role: "assistant", text: "" }])
+
+      const reader = res.body.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ""
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split("\n")
+        buffer = lines.pop() || ""
+
+        for (const line of lines) {
+          const trimmed = line.trim()
+          if (trimmed.startsWith("data:")) {
+            const data = trimmed.slice(5).trim()
+            if (data === "[DONE]") break
+            try {
+              const parsed = JSON.parse(data)
+              if (parsed.type === "text-delta" && parsed.textDelta) {
+                assistantText += parsed.textDelta
+                setMessages((prev) =>
+                  prev.map((m) =>
+                    m.id === assistantId ? { ...m, text: assistantText } : m
+                  )
+                )
+              }
+            } catch {
+              // skip invalid JSON
+            }
+          }
+        }
+      }
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          role: "assistant",
+          text: "Sorry, something went wrong. Please try again or email us at bheki.malinga@bafanaconsulting.co.za.",
+        },
+      ])
+    } finally {
+      setIsLoading(false)
+    }
+  }, [messages])
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!input.trim() || isLoading) return
-    sendMessage({ text: input })
+    const text = input
     setInput("")
+    sendMessage(text)
   }
 
   return (
@@ -79,60 +150,58 @@ export function ChatWidget() {
                   </p>
                 </div>
                 <div className="mt-2 flex flex-wrap justify-center gap-2">
-                  {["What services do you offer?", "How can I schedule a consultation?", "Tell me about your company"].map(
-                    (suggestion) => (
-                      <button
-                        key={suggestion}
-                        className="rounded-full border border-border bg-muted px-3 py-1.5 text-xs text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-                        onClick={() => {
-                          sendMessage({ text: suggestion })
-                        }}
-                      >
-                        {suggestion}
-                      </button>
-                    )
-                  )}
+                  {[
+                    "What services do you offer?",
+                    "How can I schedule a consultation?",
+                    "Tell me about your company",
+                  ].map((suggestion) => (
+                    <button
+                      key={suggestion}
+                      className="rounded-full border border-border bg-muted px-3 py-1.5 text-xs text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                      onClick={() => sendMessage(suggestion)}
+                    >
+                      {suggestion}
+                    </button>
+                  ))}
                 </div>
               </div>
             )}
 
-            {messages.map((message) => {
-              const text = getMessageText(message)
-              if (!text) return null
-
-              return (
-                <div
-                  key={message.id}
-                  className={cn("flex gap-2", message.role === "user" ? "justify-end" : "justify-start")}
-                >
-                  {message.role === "assistant" && (
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10">
-                      <Bot className="h-4 w-4 text-primary" />
-                    </div>
-                  )}
-                  <div
-                    className={cn(
-                      "max-w-[75%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed",
-                      message.role === "user"
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted text-foreground"
-                    )}
-                  >
-                    {text.split("\n").map((line, i) => (
-                      <span key={i}>
-                        {line}
-                        {i < text.split("\n").length - 1 && <br />}
-                      </span>
-                    ))}
+            {messages.map((message) => (
+              <div
+                key={message.id}
+                className={cn(
+                  "flex gap-2",
+                  message.role === "user" ? "justify-end" : "justify-start"
+                )}
+              >
+                {message.role === "assistant" && (
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                    <Bot className="h-4 w-4 text-primary" />
                   </div>
-                  {message.role === "user" && (
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-secondary/40">
-                      <User className="h-4 w-4 text-secondary-foreground" />
-                    </div>
+                )}
+                <div
+                  className={cn(
+                    "max-w-[75%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed",
+                    message.role === "user"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-foreground"
                   )}
+                >
+                  {message.text.split("\n").map((line, i) => (
+                    <span key={i}>
+                      {line.replace(/\*\*(.*?)\*\*/g, "")}
+                      {i < message.text.split("\n").length - 1 && <br />}
+                    </span>
+                  ))}
                 </div>
-              )
-            })}
+                {message.role === "user" && (
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-secondary/40">
+                    <User className="h-4 w-4 text-secondary-foreground" />
+                  </div>
+                )}
+              </div>
+            ))}
 
             {isLoading && messages[messages.length - 1]?.role === "user" && (
               <div className="flex items-center gap-2">
@@ -151,7 +220,10 @@ export function ChatWidget() {
           </div>
 
           {/* Input */}
-          <form onSubmit={handleSubmit} className="flex items-center gap-2 border-t border-border bg-card px-4 py-3">
+          <form
+            onSubmit={handleSubmit}
+            className="flex items-center gap-2 border-t border-border bg-card px-4 py-3"
+          >
             <input
               type="text"
               value={input}
