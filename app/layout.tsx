@@ -13,6 +13,9 @@ export const metadata: Metadata = {
   description:
     "Leading technology consulting firm specializing in blockchain, AI, cloud computing, and digital innovation solutions.",
   generator: "v0.app",
+  verification: {
+    google: "HAG_QC0zp8NhiwSPjG1xoN7lIFa3F2_ZdhYBFMq51so",
+  },
   icons: {
     icon: [
       {
