@@ -110,49 +110,36 @@ This booking was submitted via the Bafana Consulting website.
     // Send email using Resend (free tier supports 100 emails/day)
     const RESEND_API_KEY = process.env.RESEND_API_KEY
 
-    console.log("[v0] RESEND_API_KEY exists:", !!RESEND_API_KEY)
-
     if (RESEND_API_KEY) {
-      console.log("[v0] Attempting to send email via Resend...")
-      
-      const emailPayload = {
-        from: "Bafana Consulting Website <onboarding@resend.dev>",
-        to: "bheki.malinga@bafanaconsulting.co.za",
-        subject,
-        html: htmlBody,
-        text: textBody,
-        reply_to: email,
-      }
-      
-      console.log("[v0] Email payload:", JSON.stringify({ ...emailPayload, html: "[HTML content]" }))
-      
       const res = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${RESEND_API_KEY}`,
         },
-        body: JSON.stringify(emailPayload),
+        body: JSON.stringify({
+          from: "Bafana Consulting Website <onboarding@resend.dev>",
+          to: "bheki.malinga@bafanaconsulting.co.za",
+          subject,
+          html: htmlBody,
+          text: textBody,
+          reply_to: email,
+        }),
       })
 
-      const responseText = await res.text()
-      console.log("[v0] Resend API response status:", res.status)
-      console.log("[v0] Resend API response body:", responseText)
-
       if (!res.ok) {
-        console.error("[v0] Resend API error:", responseText)
+        const error = await res.text()
+        console.error("Resend API error:", error)
         return NextResponse.json(
           { error: "Failed to send email. Please try again." },
           { status: 500 }
         )
       }
 
-      console.log("[v0] Email sent successfully!")
       return NextResponse.json({ success: true })
     }
 
     // Fallback: log the booking if no email service is configured
-    console.log("[v0] No RESEND_API_KEY found - logging booking instead")
     console.log("=== NEW CONSULTATION BOOKING ===")
     console.log("To: bheki.malinga@bafanaconsulting.co.za")
     console.log("Subject:", subject)

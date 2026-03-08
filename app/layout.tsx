@@ -13,8 +13,31 @@ export const metadata: Metadata = {
   description:
     "Leading technology consulting firm specializing in blockchain, AI, cloud computing, and digital innovation solutions.",
   generator: "v0.app",
+  metadataBase: new URL("https://www.bafanaconsulting.co.za"),
   verification: {
     google: "HAG_QC0zp8NhiwSPjG1xoN7lIFa3F2_ZdhYBFMq51so",
+  },
+  openGraph: {
+    title: "Bafana Consulting Pty Ltd | Innovating Tomorrow",
+    description: "Leading technology consulting firm specializing in blockchain, AI, cloud computing, and digital innovation solutions.",
+    url: "https://www.bafanaconsulting.co.za",
+    siteName: "Bafana Consulting",
+    images: [
+      {
+        url: "/logo.png",
+        width: 800,
+        height: 600,
+        alt: "Bafana Consulting Logo",
+      },
+    ],
+    locale: "en_ZA",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Bafana Consulting Pty Ltd | Innovating Tomorrow",
+    description: "Leading technology consulting firm specializing in blockchain, AI, cloud computing, and digital innovation solutions.",
+    images: ["/logo.png"],
   },
   icons: {
     icon: [
