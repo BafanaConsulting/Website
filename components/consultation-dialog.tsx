@@ -39,6 +39,8 @@ export function ConsultationDialog({ trigger }: ConsultationDialogProps) {
       company: formData.get("company"),
       email: formData.get("email"),
       phone: formData.get("phone"),
+      consultationDate: formData.get("consultationDate"),
+      consultationTime: formData.get("consultationTime"),
       business: formData.get("business"),
     }
 
@@ -135,14 +137,24 @@ export function ConsultationDialog({ trigger }: ConsultationDialogProps) {
               </div>
             </div>
 
+            <div className="grid gap-6 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="consultationDate">Preferred Date *</Label>
+                <Input id="consultationDate" name="consultationDate" type="date" required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="consultationTime">Preferred Time *</Label>
+                <Input id="consultationTime" name="consultationTime" type="time" required />
+              </div>
+            </div>
+
             <div className="space-y-2">
-              <Label htmlFor="business">What Business Would You Like to Do With Us? *</Label>
+              <Label htmlFor="business">Message / Consultation Notes</Label>
               <Textarea
                 id="business"
                 name="business"
-                placeholder="Please describe the services you're interested in or the business opportunity you'd like to explore..."
+                placeholder="Please describe the services you're interested in or any additional notes for your consultation..."
                 className="min-h-[120px]"
-                required
               />
             </div>
             {/* </CHANGE> */}

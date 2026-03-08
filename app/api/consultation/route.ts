@@ -3,66 +3,108 @@ import { NextResponse } from "next/server"
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { fullName, company, email, phone, business } = body
+    const { fullName, company, email, phone, consultationDate, consultationTime, business } = body
 
-    if (!fullName || !company || !email || !phone || !business) {
+    if (!fullName || !company || !email || !phone || !consultationDate || !consultationTime) {
       return NextResponse.json(
-        { error: "All fields are required" },
+        { error: "All required fields must be filled" },
         { status: 400 }
       )
     }
 
-    const subject = `New Consultation Request from ${fullName} - ${company}`
+    // Format date for display
+    const formattedDate = new Date(consultationDate).toLocaleDateString("en-ZA", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    })
+
+    // Format time for display (convert 24h to 12h format)
+    const [hours, minutes] = consultationTime.split(":")
+    const hour = parseInt(hours, 10)
+    const ampm = hour >= 12 ? "PM" : "AM"
+    const hour12 = hour % 12 || 12
+    const formattedTime = `${hour12}:${minutes} ${ampm}`
+
+    const subject = "New Consultation Booking – Bafana Consulting"
+    
     const htmlBody = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #166534; border-bottom: 2px solid #eab308; padding-bottom: 10px;">
-          New Consultation Request
+          New Consultation Booking
         </h2>
-        <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+        <p>A new consultation has been scheduled on the website.</p>
+        
+        <h3 style="color: #166534; margin-top: 20px;">Client Details:</h3>
+        <table style="width: 100%; border-collapse: collapse;">
           <tr>
-            <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; font-weight: bold; width: 180px;">Full Name</td>
-            <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">${fullName}</td>
+            <td style="padding: 8px 0; font-weight: bold; width: 120px;">Name:</td>
+            <td style="padding: 8px 0;">${fullName}</td>
           </tr>
           <tr>
-            <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; font-weight: bold;">Company</td>
-            <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">${company}</td>
+            <td style="padding: 8px 0; font-weight: bold;">Company:</td>
+            <td style="padding: 8px 0;">${company}</td>
           </tr>
           <tr>
-            <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; font-weight: bold;">Email</td>
-            <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">
-              <a href="mailto:${email}">${email}</a>
-            </td>
+            <td style="padding: 8px 0; font-weight: bold;">Email:</td>
+            <td style="padding: 8px 0;"><a href="mailto:${email}">${email}</a></td>
           </tr>
           <tr>
-            <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; font-weight: bold;">Phone</td>
-            <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">
-              <a href="tel:${phone}">${phone}</a>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; font-weight: bold; vertical-align: top;">Business Enquiry</td>
-            <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; white-space: pre-wrap;">${business}</td>
+            <td style="padding: 8px 0; font-weight: bold;">Phone:</td>
+            <td style="padding: 8px 0;"><a href="tel:${phone}">${phone}</a></td>
           </tr>
         </table>
+        
+        <h3 style="color: #166534; margin-top: 20px;">Consultation Details:</h3>
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr>
+            <td style="padding: 8px 0; font-weight: bold; width: 120px;">Date:</td>
+            <td style="padding: 8px 0;">${formattedDate}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; font-weight: bold;">Time:</td>
+            <td style="padding: 8px 0;">${formattedTime}</td>
+          </tr>
+        </table>
+        
+        ${business ? `
+        <h3 style="color: #166534; margin-top: 20px;">Message:</h3>
+        <p style="background: #f3f4f6; padding: 15px; border-radius: 8px; white-space: pre-wrap;">${business}</p>
+        ` : ""}
+        
+        <p style="margin-top: 30px; padding: 15px; background: #fef3c7; border-radius: 8px;">
+          <strong>Please follow up with the client to confirm the consultation.</strong>
+        </p>
+        
         <p style="margin-top: 20px; color: #6b7280; font-size: 12px;">
-          This enquiry was submitted via the Bafana Consulting website.
+          This booking was submitted via the Bafana Consulting website.
         </p>
       </div>
     `
 
     const textBody = `
-New Consultation Request
-========================
-Full Name: ${fullName}
+New Consultation Booking – Bafana Consulting
+=============================================
+
+A new consultation has been scheduled on the website.
+
+Client Details:
+Name: ${fullName}
 Company: ${company}
 Email: ${email}
 Phone: ${phone}
 
-Business Enquiry:
-${business}
+Consultation Details:
+Date: ${formattedDate}
+Time: ${formattedTime}
+
+${business ? `Message:\n${business}` : ""}
+
+Please follow up with the client to confirm the consultation.
 
 ---
-This enquiry was submitted via the Bafana Consulting website.
+This booking was submitted via the Bafana Consulting website.
     `.trim()
 
     // Send email using Resend (free tier supports 100 emails/day)
@@ -97,8 +139,8 @@ This enquiry was submitted via the Bafana Consulting website.
       return NextResponse.json({ success: true })
     }
 
-    // Fallback: log the enquiry if no email service is configured
-    console.log("=== NEW CONSULTATION REQUEST ===")
+    // Fallback: log the booking if no email service is configured
+    console.log("=== NEW CONSULTATION BOOKING ===")
     console.log("To: bheki.malinga@bafanaconsulting.co.za")
     console.log("Subject:", subject)
     console.log("Body:", textBody)
